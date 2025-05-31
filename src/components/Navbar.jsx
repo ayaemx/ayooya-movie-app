@@ -9,6 +9,16 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="nav-left">
+        {/* Logo styled like Netflix */}
+        <Link to="/" className="logo" style={{
+          fontWeight: 'bold',
+          fontSize: '2rem',
+          color: '#E50914',
+          letterSpacing: '2px',
+          textShadow: '1px 1px 8px #000'
+        }}>
+          Ayooya
+        </Link>
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/favorites" className="nav-link">Favorites</Link>
       </div>

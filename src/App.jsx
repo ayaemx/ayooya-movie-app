@@ -13,8 +13,8 @@ export default function App() {
         <Route path="/" element={<Home />} />
         {/* Uncomment and add these pages when you create them: */}
         {/* <Route path="/favorites" element={<Favorites />} /> */}
-        {/* <Route path="/login" element={<Login />} /> */}
-      </Routes>
+         <Route path="/login" element={<Login />} />
+       </Routes>
     </>
   )
 }

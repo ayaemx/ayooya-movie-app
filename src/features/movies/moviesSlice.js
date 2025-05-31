@@ -1,10 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
+// Get the API key from the environment variable
+const apiKey = import.meta.env.VITE_TMDB_API_KEY
+
 export const fetchMovies = createAsyncThunk(
   'movies/fetchMovies',
   async () => {
     const response = await fetch(
-      'https://api.themoviedb.org/3/movie/popular?api_key=YOUR_API_KEY'
+      `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`
     )
     const data = await response.json()
     return data.results

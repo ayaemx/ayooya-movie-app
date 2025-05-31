@@ -1,0 +1,27 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: #0F172A;
+  color: white;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  margin: 0 1rem;
+  padding: 0.5rem;
+  transition: opacity 0.2s;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+.badge {
+  background: #F59E0B;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 0.5rem;
+}

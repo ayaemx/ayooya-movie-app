@@ -1,16 +1,26 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchMovies } from '../features/movies/moviesSlice'
 import MovieCard from '../components/MovieCard'
 
 export default function Home() {
-  // Replace with your real movies array later
-  const movies = [
-    {
-      id: 1,
-      title: "Inception",
-      poster_path: "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
-    },
-    // Add more mock movies for testing
-  ]
+  const dispatch = useDispatch()
+  const movies = useSelector(state => state.movies.items)
+  const status = useSelector(state => state.movies.status)
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchMovies())
+    }
+  }, [dispatch, status])
+
+  if (status === 'loading') {
+    return <div style={{ color: '#fff', textAlign: 'center', marginTop: '3rem' }}>Loading movies...</div>
+  }
+
+  if (status === 'failed') {
+    return <div style={{ color: 'red', textAlign: 'center', marginTop: '3rem' }}>Failed to load movies.</div>
+  }
 
   return (
     <div className="movie-grid-container">

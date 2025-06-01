@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchMovies } from '../features/movies/moviesSlice'
 import MovieCard from '../components/MovieCard'
+import Loader from '../components/Loader'
 
 export default function Home() {
   const dispatch = useDispatch()
@@ -15,7 +16,7 @@ export default function Home() {
   }, [dispatch, status])
 
   if (status === 'loading') {
-    return <div style={{ color: '#fff', textAlign: 'center', marginTop: '3rem' }}>Loading movies...</div>
+    return <Loader />
   }
 
   if (status === 'failed') {

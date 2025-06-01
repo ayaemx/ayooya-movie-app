@@ -4,7 +4,7 @@ import { addFavorite, removeFavorite } from '../features/favorites/favoritesSlic
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder'
 
-export default function MovieCard({ movie }) {
+export default function MovieCard({ movie  , onDetails}) {
   const dispatch = useDispatch()
   const favorites = useSelector(state => state.favorites.items)
   const isFavorite = favorites.some(fav => fav.id === movie.id)
@@ -19,7 +19,7 @@ export default function MovieCard({ movie }) {
     }
   }
 
-  return (
+ return (
     <div
       className="movie-card"
       onMouseEnter={() => setHovered(true)}
@@ -32,11 +32,9 @@ export default function MovieCard({ movie }) {
         alt={movie.title}
         className="movie-poster"
       />
-      {/* Movie title always visible, overlayed */}
       <div className="movie-title-overlay">
         <span>{movie.title}</span>
       </div>
-      {/* Hover overlay */}
       {hovered && (
         <div className="movie-hover-overlay">
           <button className="bookmark-btn" onClick={handleBookmark}>
@@ -44,12 +42,9 @@ export default function MovieCard({ movie }) {
               <BookmarkIcon style={{ color: '#E50914' }} />
             ) : (
               <BookmarkBorderIcon style={{ color: '#fff' }} />
-            )} 
-            </button>
-            <button className="details-btn" onClick={() => onDetails(movie)}>
-            Details
+            )}
           </button>
-          <button className="details-btn">
+          <button className="details-btn" onClick={() => onDetails(movie)}>
             Details
           </button>
         </div>
@@ -57,3 +52,4 @@ export default function MovieCard({ movie }) {
     </div>
   )
 }
+

@@ -1,0 +1,12 @@
+{
+  "home": "Home",
+  "favorites": "Favorites",
+  "search_placeholder": "Search movies...",
+  "all_genres": "All Genres",
+  "sign_in": "Sign In",
+  "register": "Register",
+  "more_info": "More Info",
+  "no_favorites": "No favorites yet.",
+  "loading": "Loading movies...",
+  "failed": "Failed to load movies."
+}

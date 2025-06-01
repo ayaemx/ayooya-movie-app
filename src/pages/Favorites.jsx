@@ -1,11 +1,11 @@
-import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { removeFavorite } from '../features/favorites/favoritesSlice'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
 import MovieCard from '../components/MovieCard'
+import MovieModal from '../components/MovieModel'
 
 export default function Favorites() {
   const favorites = useSelector(state => state.favorites.items)
-  const dispatch = useDispatch()
+  const [selectedMovie, setSelectedMovie] = useState(null)
 
   if (favorites.length === 0) {
     return <div style={{ color: '#fff', textAlign: 'center', marginTop: '3rem' }}>No favorites yet.</div>
@@ -15,9 +15,14 @@ export default function Favorites() {
     <div className="movie-grid-container">
       <div className="movie-grid">
         {favorites.map(movie => (
-          <MovieCard key={movie.id} movie={movie} />
+          <MovieCard
+            key={movie.id}
+            movie={movie}
+            onDetails={setSelectedMovie} // Pass this prop for the Details button
+          />
         ))}
       </div>
+      <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
     </div>
   )
 }

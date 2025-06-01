@@ -1,20 +1,47 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
-// import Favorites from './pages/Favorites'
+import Favorites from './pages/Favorites'
 import Login from './pages/Login'
+import Register from './pages/Register'
+import { fetchGenres } from './api/tmdb'
+
+const apiKey = import.meta.env.VITE_TMDB_API_KEY
 
 export default function App() {
+  const [genres, setGenres] = useState([])
+  const [selectedGenre, setSelectedGenre] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    fetchGenres(apiKey).then(setGenres)
+  }, [])
+
+  const handleSearch = (query) => setSearchTerm(query)
+  const handleGenreChange = (genreId) => setSelectedGenre(genreId)
+
   return (
     <>
-      <Navbar />
+      <Navbar
+        onSearch={handleSearch}
+        genres={genres}
+        selectedGenre={selectedGenre}
+        onGenreChange={handleGenreChange}
+      />
       <Routes>
-        <Route path="/" element={<Home />} />
-        {/* Uncomment and add these pages when you create them: */}
-         <Route path="/favorites" element={<Favorites />} />
-         <Route path="/login" element={<Login />} />
-       </Routes>
+        <Route path="/"
+          element={
+            <Home
+              selectedGenre={selectedGenre}
+              searchTerm={searchTerm}
+            />
+          }
+        />
+        <Route path="/favorites" element={<Favorites />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
     </>
   )
 }

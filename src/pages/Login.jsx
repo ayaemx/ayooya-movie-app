@@ -1,20 +1,19 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
-// import { login } from '../features/auth/authSlice' // for real auth
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 
 export default function Login() {
-  const dispatch = useDispatch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Example static login (replace with real API or Redux logic)
+    // Replace this with real authentication logic
     if (email === 'test@example.com' && password === 'password') {
-      // dispatch(login({ email })) // for real auth
       setError('')
-      alert('Login successful! (implement real auth for production)')
+      navigate('/', { replace: true })
     } else {
       setError('Invalid email or password')
     }
@@ -24,6 +23,11 @@ export default function Login() {
     <div className="login-container">
       <form className="login-form" onSubmit={handleSubmit}>
         <h2>Login</h2>
+        {location.state && location.state.registered && (
+          <div style={{ color: '#4ade80', marginBottom: '1rem', textAlign: 'center' }}>
+            Registration successful! Please log in.
+          </div>
+        )}
         <input
           type="email"
           placeholder="Email"
@@ -40,6 +44,10 @@ export default function Login() {
         />
         {error && <div className="login-error">{error}</div>}
         <button type="submit">Login</button>
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <span style={{ color: '#fff' }}>Don't have an account? </span>
+          <Link to="/register" style={{ color: '#E50914', textDecoration: 'underline' }}>Register</Link>
+        </div>
       </form>
     </div>
   )

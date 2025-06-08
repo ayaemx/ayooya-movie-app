@@ -71,14 +71,29 @@ export default function Home({ selectedGenre, searchTerm }) {
     }
   }
 
-  // Hero navigation
-  const nextHero = () => {
-    setHeroIndex((prev) => (prev + 1) % Math.min(movies.length, 5))
-  }
+  
+// Hero navigation (Fixed with debug)
+const nextHero = () => {
+  const maxIndex = Math.min(movies.length, 5)
+  console.log('Next: current index:', heroIndex, 'max:', maxIndex)
+  setHeroIndex((prev) => {
+    const newIndex = (prev + 1) % maxIndex
+    console.log('Next: new index:', newIndex)
+    return newIndex
+  })
+}
 
-  const prevHero = () => {
-    setHeroIndex((prev) => (prev - 1 + Math.min(movies.length, 5)) % Math.min(movies.length, 5))
-  }
+const prevHero = () => {
+  const maxIndex = Math.min(movies.length, 5)
+  console.log('Prev: current index:', heroIndex, 'max:', maxIndex)
+  setHeroIndex((prev) => {
+    const newIndex = prev === 0 ? maxIndex - 1 : prev - 1
+    console.log('Prev: new index:', newIndex)
+    return newIndex
+  })
+}
+
+
 
   // Pagination logic
   const totalPages = Math.ceil(movies.length / moviesPerPage)

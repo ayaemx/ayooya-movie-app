@@ -1,15 +1,19 @@
 import React from 'react'
 import { ClipLoader } from 'react-spinners'
 
-export default function Loader({ size = 60, color = '#E50914' }) {
+export default function Loader({ message = "Loading amazing movies..." }) {
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '40vh'
-    }}>
-      <ClipLoader size={size} color={color} />
+    <div className="enhanced-loader">
+      <div className="loader-content">
+        <ClipLoader
+          color="#E50914"
+          size={60}
+          aria-label="Loading Spinner"
+          data-testid="loader"
+        />
+        <h3>{message}</h3>
+        <p>Preparing your cinematic experience</p>
+      </div>
     </div>
   )
 }

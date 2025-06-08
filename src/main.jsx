@@ -1,19 +1,18 @@
-import React from 'react'
-import './i18n';
-
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { HashRouter } from 'react-router-dom' // Changed from BrowserRouter
 import { Provider } from 'react-redux'
 import { store } from './app/store.js'
 import App from './App.jsx'
-import { BrowserRouter } from 'react-router-dom'
 import './index.css'
+import './i18n'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <HashRouter>
         <App />
-      </BrowserRouter>
+      </HashRouter>
     </Provider>
-  </React.StrictMode>
+  </StrictMode>,
 )

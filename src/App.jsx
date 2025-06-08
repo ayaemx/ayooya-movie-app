@@ -6,6 +6,7 @@ import Favorites from './pages/Favorites'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ErrorBoundary from './components/ErrorBoundary'
+import ChatBot from './components/ChatBot' // Add this import
 import { fetchGenres } from './api/tmdb'
 
 const apiKey = import.meta.env.VITE_TMDB_API_KEY
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
+      <ChatBot /> {/* Add this line */}
     </ErrorBoundary>
   )
 }

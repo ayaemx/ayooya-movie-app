@@ -5,12 +5,16 @@ import { fetchGenres } from '../api/tmdb'
 import MovieCard from '../components/MovieCard'
 import Loader from '../components/Loader'
 import MovieModal from '../components/MovieModel'
+import YouTube from 'react-youtube'
 import StarIcon from '@mui/icons-material/Star'
 import MovieIcon from '@mui/icons-material/Movie'
 import SearchIcon from '@mui/icons-material/Search'
 import PublicIcon from '@mui/icons-material/Public'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import CloseIcon from '@mui/icons-material/Close'
 
 const apiKey = import.meta.env.VITE_TMDB_API_KEY
 
@@ -20,6 +24,12 @@ export default function Home({ selectedGenre, searchTerm }) {
   const status = useSelector(state => state.movies.status)
   const [selectedMovie, setSelectedMovie] = useState(null)
   const [heroIndex, setHeroIndex] = useState(0)
+  const [showTrailer, setShowTrailer] = useState(false)
+  const [trailerKey, setTrailerKey] = useState('')
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const moviesPerPage = 6
 
   useEffect(() => {
     if (searchTerm) {
@@ -29,6 +39,7 @@ export default function Home({ selectedGenre, searchTerm }) {
     } else {
       dispatch(fetchMovies())
     }
+    setCurrentPage(1) // Reset to first page when search/filter changes
   }, [dispatch, selectedGenre, searchTerm])
 
   // Auto-rotate hero every 8 seconds
@@ -41,6 +52,44 @@ export default function Home({ selectedGenre, searchTerm }) {
     }
   }, [movies])
 
+  // Fetch trailer for hero movie
+  const fetchTrailer = async (movieId) => {
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${apiKey}&language=en-US`
+      )
+      const data = await response.json()
+      const trailer = data.results.find(video => 
+        video.type === 'Trailer' && video.site === 'YouTube'
+      )
+      if (trailer) {
+        setTrailerKey(trailer.key)
+        setShowTrailer(true)
+      }
+    } catch (error) {
+      console.error('Error fetching trailer:', error)
+    }
+  }
+
+  // Hero navigation
+  const nextHero = () => {
+    setHeroIndex((prev) => (prev + 1) % Math.min(movies.length, 5))
+  }
+
+  const prevHero = () => {
+    setHeroIndex((prev) => (prev - 1 + Math.min(movies.length, 5)) % Math.min(movies.length, 5))
+  }
+
+  // Pagination logic
+  const totalPages = Math.ceil(movies.length / moviesPerPage)
+  const startIndex = (currentPage - 1) * moviesPerPage
+  const currentMovies = movies.slice(startIndex, startIndex + moviesPerPage)
+
+  const goToPage = (page) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: document.querySelector('.main-movies-section').offsetTop - 100, behavior: 'smooth' })
+  }
+
   if (status === 'loading') return <Loader />
   if (status === 'failed') return <div style={{ color: 'red', textAlign: 'center', marginTop: '3rem' }}>Failed to load movies.</div>
 
@@ -49,7 +98,32 @@ export default function Home({ selectedGenre, searchTerm }) {
 
   return (
     <>
-      {/* Enhanced Hero Section */}
+      {/* Trailer Modal */}
+      {showTrailer && trailerKey && (
+        <div className="trailer-overlay" onClick={() => setShowTrailer(false)}>
+          <div className="trailer-container" onClick={e => e.stopPropagation()}>
+            <button className="trailer-close" onClick={() => setShowTrailer(false)}>
+              <CloseIcon />
+            </button>
+            <YouTube
+              videoId={trailerKey}
+              opts={{
+                width: '100%',
+                height: '500px',
+                playerVars: {
+                  autoplay: 1,
+                  controls: 1,
+                  rel: 0,
+                  showinfo: 0,
+                  modestbranding: 1,
+                },
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Hero Section with Navigation */}
       {heroMovie && (
         <section className="hero-section">
           <img 
@@ -58,6 +132,15 @@ export default function Home({ selectedGenre, searchTerm }) {
             className="hero-bg" 
           />
           <div className="hero-overlay"></div>
+          
+          {/* Hero Navigation Arrows */}
+          <button className="hero-nav hero-nav-left" onClick={prevHero}>
+            <ChevronLeftIcon />
+          </button>
+          <button className="hero-nav hero-nav-right" onClick={nextHero}>
+            <ChevronRightIcon />
+          </button>
+
           <div className="hero-content">
             <div className="hero-badge">Featured Movie</div>
             <h1>{heroMovie.title}</h1>
@@ -67,7 +150,7 @@ export default function Home({ selectedGenre, searchTerm }) {
             </div>
             <p>{heroMovie.overview}</p>
             <div className="hero-buttons">
-              <button className="hero-btn primary" onClick={() => setSelectedMovie(heroMovie)}>
+              <button className="hero-btn primary" onClick={() => fetchTrailer(heroMovie.id)}>
                 <PlayArrowIcon /> Watch Trailer
               </button>
               <button className="hero-btn secondary" onClick={() => setSelectedMovie(heroMovie)}>
@@ -176,15 +259,49 @@ export default function Home({ selectedGenre, searchTerm }) {
         </div>
       </section>
 
-      {/* Main Movie Grid */}
+      {/* Main Movies Section with Pagination */}
       <section className="main-movies-section">
         <div className="container">
           <h2>All Movies</h2>
           <div className="movie-grid">
-            {movies.map(movie => (
+            {currentMovies.map(movie => (
               <MovieCard key={movie.id} movie={movie} onDetails={setSelectedMovie} />
             ))}
           </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button 
+                className="pagination-btn"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              
+              {[...Array(totalPages)].map((_, index) => {
+                const page = index + 1
+                return (
+                  <button
+                    key={page}
+                    className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                    onClick={() => goToPage(page)}
+                  >
+                    {page}
+                  </button>
+                )
+              })}
+              
+              <button 
+                className="pagination-btn"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

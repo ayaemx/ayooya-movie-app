@@ -21,16 +21,20 @@ export default function ChatBot() {
   const messagesEndRef = useRef(null)
   const movies = useSelector(state => state.movies.items)
 
+  // Enhanced quick options with more variety
   const quickOptions = [
-    { text: "🎬 Action Movies", query: "action movies" },
-    { text: "😂 Comedy Movies", query: "comedy movies" },
-    { text: "💕 Romance Movies", query: "romance movies" },
-    { text: "👻 Horror Movies", query: "horror movies" },
-    { text: "⭐ Top Rated", query: "top rated movies" },
-    { text: "🔥 Popular Now", query: "popular movies" },
-    { text: "🎲 Surprise Me", query: "random movies" },
-    { text: "❓ Help", query: "help" }
+    { text: "🎬 Action Movies", query: "action movies", keywords: ["action", "adventure", "fight", "thriller"] },
+    { text: "😂 Comedy Movies", query: "comedy movies", keywords: ["comedy", "funny", "laugh", "humor"] },
+    { text: "💕 Romance Movies", query: "romance movies", keywords: ["romance", "love", "romantic"] },
+    { text: "👻 Horror Movies", query: "horror movies", keywords: ["horror", "scary", "fear", "thriller"] },
+    { text: "⭐ Top Rated", query: "top rated movies", keywords: ["top", "best", "highly rated", "award"] },
+    { text: "🔥 Popular Now", query: "popular movies", keywords: ["popular", "trending", "famous"] },
+    { text: "🎲 Surprise Me", query: "random movies", keywords: ["random", "surprise", "anything"] },
+    { text: "❓ Help", query: "help", keywords: ["help", "what can you do"] }
   ]
+
+  // Cache for faster responses
+  const responseCache = useRef(new Map())
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -40,131 +44,207 @@ export default function ChatBot() {
     scrollToBottom()
   }, [messages])
 
-  const getMovieRecommendations = (userInput) => {
+  // Enhanced movie recommendation logic with better accuracy
+  const getMovieRecommendations = (userInput, intent = null) => {
+    const cacheKey = `${userInput}-${intent}`
+    if (responseCache.current.has(cacheKey)) {
+      return responseCache.current.get(cacheKey)
+    }
+
     const input = userInput.toLowerCase()
     let recommendations = []
+    
+    // Enhanced genre detection with multiple keywords
+    const genreKeywords = {
+      action: ["action", "fight", "adventure", "war", "battle", "combat", "explosive"],
+      comedy: ["comedy", "funny", "laugh", "humor", "hilarious", "comic", "amusing"],
+      horror: ["horror", "scary", "fear", "frightening", "spooky", "terrifying", "suspense"],
+      romance: ["romance", "love", "romantic", "dating", "relationship", "passion"],
+      drama: ["drama", "serious", "emotional", "deep", "intense", "moving"],
+      family: ["family", "kids", "children", "animated", "disney"],
+      scifi: ["sci-fi", "science fiction", "space", "future", "alien", "technology"]
+    }
 
-    // Genre-based recommendations
-    if (input.includes('action') || input.includes('fight') || input.includes('adventure')) {
+    let detectedGenre = null
+    for (const [genre, keywords] of Object.entries(genreKeywords)) {
+      if (keywords.some(keyword => input.includes(keyword))) {
+        detectedGenre = genre
+        break
+      }
+    }
+
+    // Get recommendations based on detected genre or intent
+    if (detectedGenre === 'action' || intent === 'action') {
       recommendations = movies.filter(movie => 
-        movie.genre_ids?.includes(28) || movie.overview?.toLowerCase().includes('action')
+        movie.genre_ids?.includes(28) || movie.genre_ids?.includes(12) ||
+        movie.overview?.toLowerCase().includes('action') ||
+        movie.overview?.toLowerCase().includes('adventure')
       ).slice(0, 3)
     }
-    else if (input.includes('comedy') || input.includes('funny') || input.includes('laugh')) {
+    else if (detectedGenre === 'comedy' || intent === 'comedy') {
       recommendations = movies.filter(movie => 
-        movie.genre_ids?.includes(35) || movie.overview?.toLowerCase().includes('comedy')
+        movie.genre_ids?.includes(35) ||
+        movie.overview?.toLowerCase().includes('comedy') ||
+        movie.overview?.toLowerCase().includes('funny')
       ).slice(0, 3)
     }
-    else if (input.includes('horror') || input.includes('scary') || input.includes('fear')) {
+    else if (detectedGenre === 'horror' || intent === 'horror') {
       recommendations = movies.filter(movie => 
-        movie.genre_ids?.includes(27) || movie.overview?.toLowerCase().includes('horror')
+        movie.genre_ids?.includes(27) ||
+        movie.overview?.toLowerCase().includes('horror') ||
+        movie.overview?.toLowerCase().includes('scary')
       ).slice(0, 3)
     }
-    else if (input.includes('romance') || input.includes('love') || input.includes('romantic')) {
+    else if (detectedGenre === 'romance' || intent === 'romance') {
       recommendations = movies.filter(movie => 
-        movie.genre_ids?.includes(10749) || movie.overview?.toLowerCase().includes('love')
+        movie.genre_ids?.includes(10749) ||
+        movie.overview?.toLowerCase().includes('love') ||
+        movie.overview?.toLowerCase().includes('romance')
       ).slice(0, 3)
     }
-    else if (input.includes('drama') || input.includes('serious') || input.includes('emotional')) {
+    else if (detectedGenre === 'drama' || intent === 'drama') {
       recommendations = movies.filter(movie => 
-        movie.genre_ids?.includes(18) || movie.overview?.toLowerCase().includes('drama')
+        movie.genre_ids?.includes(18) ||
+        movie.overview?.toLowerCase().includes('drama')
       ).slice(0, 3)
     }
-    // Rating-based recommendations
-    else if (input.includes('top rated') || input.includes('best') || input.includes('highly rated')) {
-      recommendations = movies.sort((a, b) => b.vote_average - a.vote_average).slice(0, 3)
+    // Rating and popularity-based
+    else if (input.includes('top') || input.includes('best') || input.includes('highly rated') || intent === 'top_rated') {
+      recommendations = movies
+        .filter(movie => movie.vote_average >= 7.0)
+        .sort((a, b) => b.vote_average - a.vote_average)
+        .slice(0, 3)
     }
-    // Popular recommendations
-    else if (input.includes('popular') || input.includes('trending') || input.includes('famous')) {
-      recommendations = movies.sort((a, b) => b.popularity - a.popularity).slice(0, 3)
+    else if (input.includes('popular') || input.includes('trending') || input.includes('famous') || intent === 'popular') {
+      recommendations = movies
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 3)
     }
-    // Random recommendations
-    else if (input.includes('random') || input.includes('surprise') || input.includes('anything')) {
+    else if (input.includes('random') || input.includes('surprise') || input.includes('anything') || intent === 'random') {
       const shuffled = [...movies].sort(() => 0.5 - Math.random())
       recommendations = shuffled.slice(0, 3)
     }
-    // Default: recent movies
+    // Recent movies
+    else if (input.includes('new') || input.includes('recent') || input.includes('latest')) {
+      recommendations = movies
+        .filter(movie => movie.release_date)
+        .sort((a, b) => new Date(b.release_date) - new Date(a.release_date))
+        .slice(0, 3)
+    }
+    // Default: mix of popular and high-rated
     else {
-      recommendations = movies.slice(0, 3)
+      const popular = movies.sort((a, b) => b.popularity - a.popularity).slice(0, 2)
+      const topRated = movies.filter(movie => movie.vote_average >= 7.5).slice(0, 1)
+      recommendations = [...popular, ...topRated]
     }
 
+    // Cache the result
+    responseCache.current.set(cacheKey, recommendations)
     return recommendations
   }
 
-  const generateBotResponse = (userInput) => {
+  // Enhanced response generation with pre-defined responses for speed
+  const generateBotResponse = (userInput, quickOptionIntent = null) => {
     const input = userInput.toLowerCase()
-    const recommendations = getMovieRecommendations(userInput)
+    const recommendations = getMovieRecommendations(userInput, quickOptionIntent)
 
     let response = ""
+    let showQuickOptions = false
 
-    // Positive feedback responses
-    if (input.includes('thanks') || input.includes('thank you') || input.includes('thx')) {
-      const thankResponses = [
+    // Pre-defined responses for common queries (faster)
+    const responses = {
+      greeting: [
+        "Hello there, movie enthusiast! 👋🎬 I'm Ayooya Assistant, here to help you find amazing movies. What kind of film are you in the mood for today?",
+        "Hi! 🎬 Welcome to Ayooya! I'm here to help you discover your next favorite movie. What are you looking for?",
+        "Hey! 👋 Ready to find some amazing movies? I'm here to help you explore our collection!"
+      ],
+      thanks: [
         "You're very welcome! 🎬 Enjoy your movie night with Ayooya!",
         "My pleasure! Hope you find something amazing to watch! 🍿",
         "Happy to help! Have a fantastic movie experience! ✨",
         "Anytime! Grab some popcorn and enjoy! 🎭"
-      ]
-      response = thankResponses[Math.floor(Math.random() * thankResponses.length)]
-      return { response, recommendations: [], showQuickOptions: true }
-    }
-    else if (input.includes('good work') || input.includes('great job') || input.includes('awesome') || input.includes('amazing')) {
-      const appreciationResponses = [
+      ],
+      appreciation: [
         "Thank you so much! 😊 I'm glad I could help you discover great movies on Ayooya!",
         "That means a lot! 🎬 I love helping movie lovers find their next favorite film!",
         "Thanks! I'm here whenever you need movie recommendations. Enjoy watching! 🍿",
         "Aww, thank you! 🌟 Have an amazing time with your movie selection!"
-      ]
-      response = appreciationResponses[Math.floor(Math.random() * appreciationResponses.length)]
-      return { response, recommendations: [], showQuickOptions: true }
-    }
-    else if (input.includes('perfect') || input.includes('excellent') || input.includes('wonderful')) {
-      response = "I'm so happy you're satisfied! 🎉 Enjoy your cinematic journey and come back anytime for more recommendations! 🎬✨"
-      return { response, recommendations: [], showQuickOptions: true }
-    }
-    else if (input.includes('bye') || input.includes('goodbye') || input.includes('see you')) {
-      const goodbyeResponses = [
+      ],
+      goodbye: [
         "Goodbye! 👋 Enjoy your movies and come back to Ayooya anytime!",
         "See you later! 🎬 Have a wonderful time watching your films!",
         "Farewell, movie lover! 🍿 May your next watch be absolutely amazing!",
         "Until next time! 🌟 Happy movie watching on Ayooya!"
       ]
-      response = goodbyeResponses[Math.floor(Math.random() * goodbyeResponses.length)]
-      return { response, recommendations: [], showQuickOptions: false }
     }
-    // Greeting responses
+
+    // Quick response logic for common patterns
+    if (input.includes('thanks') || input.includes('thank you') || input.includes('thx')) {
+      response = responses.thanks[Math.floor(Math.random() * responses.thanks.length)]
+      showQuickOptions = true
+      return { response, recommendations: [], showQuickOptions }
+    }
+    else if (input.includes('good work') || input.includes('great job') || input.includes('awesome') || input.includes('amazing') || input.includes('perfect')) {
+      response = responses.appreciation[Math.floor(Math.random() * responses.appreciation.length)]
+      showQuickOptions = true
+      return { response, recommendations: [], showQuickOptions }
+    }
+    else if (input.includes('bye') || input.includes('goodbye') || input.includes('see you')) {
+      response = responses.goodbye[Math.floor(Math.random() * responses.goodbye.length)]
+      showQuickOptions = false
+      return { response, recommendations: [], showQuickOptions }
+    }
     else if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
-      response = "Hello there, movie enthusiast! 👋🎬 I'm Ayooya Assistant, here to help you find amazing movies. What kind of film are you in the mood for today?"
-      return { response, recommendations: [], showQuickOptions: true }
+      response = responses.greeting[Math.floor(Math.random() * responses.greeting.length)]
+      showQuickOptions = true
+      return { response, recommendations: [], showQuickOptions }
     }
-    // Genre-based responses
-    else if (input.includes('action')) {
-      response = "Excellent choice! 💥 Here are some heart-pounding action movies that'll keep you on the edge of your seat:"
+
+    // Genre-specific responses with intent detection
+    const genreResponses = {
+      action: "Excellent choice! 💥 Here are some heart-pounding action movies that'll keep you on the edge of your seat:",
+      comedy: "Time for some laughs! 😄 Here are some hilarious movies that'll brighten your day:",
+      horror: "Feeling brave tonight? 👻 Here are some spine-chilling movies (watch with the lights on!):",
+      romance: "Aww, looking for love! 💕 Here are some beautiful romantic movies to warm your heart:",
+      drama: "Ready for some deep storytelling? 🎭 Here are some compelling drama movies:",
+      top_rated: "Going for quality! ⭐ Here are the highest-rated movies that critics and audiences love:",
+      popular: "Great taste! 📈 Here are the most popular movies everyone's talking about:",
+      random: "I love surprises! 🎲 Here's a delightful random selection just for you:"
     }
-    else if (input.includes('comedy') || input.includes('funny')) {
-      response = "Time for some laughs! 😄 Here are some hilarious movies that'll brighten your day:"
+
+    // Map quick option intents to responses
+    if (quickOptionIntent && genreResponses[quickOptionIntent]) {
+      response = genreResponses[quickOptionIntent]
     }
-    else if (input.includes('horror') || input.includes('scary')) {
-      response = "Feeling brave tonight? 👻 Here are some spine-chilling movies (watch with the lights on!):"
+    // Detect genre in user input
+    else if (input.includes('action') || input.includes('fight') || input.includes('adventure')) {
+      response = genreResponses.action
     }
-    else if (input.includes('romance') || input.includes('love')) {
-      response = "Aww, looking for love! 💕 Here are some beautiful romantic movies to warm your heart:"
+    else if (input.includes('comedy') || input.includes('funny') || input.includes('laugh')) {
+      response = genreResponses.comedy
     }
-    else if (input.includes('drama')) {
-      response = "Ready for some deep storytelling? 🎭 Here are some compelling drama movies:"
+    else if (input.includes('horror') || input.includes('scary') || input.includes('fear')) {
+      response = genreResponses.horror
     }
-    else if (input.includes('top rated') || input.includes('best')) {
-      response = "Going for quality! ⭐ Here are the highest-rated movies that critics and audiences love:"
+    else if (input.includes('romance') || input.includes('love') || input.includes('romantic')) {
+      response = genreResponses.romance
     }
-    else if (input.includes('popular') || input.includes('trending')) {
-      response = "Great taste! 📈 Here are the most popular movies everyone's talking about:"
+    else if (input.includes('drama') || input.includes('serious') || input.includes('emotional')) {
+      response = genreResponses.drama
     }
-    else if (input.includes('random') || input.includes('surprise')) {
-      response = "I love surprises! 🎲 Here's a delightful random selection just for you:"
+    else if (input.includes('top') || input.includes('best') || input.includes('highly rated')) {
+      response = genreResponses.top_rated
+    }
+    else if (input.includes('popular') || input.includes('trending') || input.includes('famous')) {
+      response = genreResponses.popular
+    }
+    else if (input.includes('random') || input.includes('surprise') || input.includes('anything')) {
+      response = genreResponses.random
     }
     else if (input.includes('help')) {
       response = "I'm here to help you discover amazing movies on Ayooya! 🎬 You can:\n\n• Use the quick options below\n• Ask me 'I want an action movie'\n• Say 'Show me comedies'\n• Try 'What's popular?'\n• Request 'Surprise me with something random'\n\nWhat sounds good to you?"
-      return { response, recommendations: [], showQuickOptions: true }
+      showQuickOptions = true
+      return { response, recommendations: [], showQuickOptions }
     }
     // Default responses
     else {
@@ -177,10 +257,11 @@ export default function ChatBot() {
       response = defaultResponses[Math.floor(Math.random() * defaultResponses.length)]
     }
 
-    return { response, recommendations, showQuickOptions: true }
+    showQuickOptions = true
+    return { response, recommendations, showQuickOptions }
   }
 
-  const handleSendMessage = (text = null) => {
+  const handleSendMessage = (text = null, intent = null) => {
     const messageText = text || inputText
     if (!messageText.trim()) return
 
@@ -195,9 +276,9 @@ export default function ChatBot() {
     setInputText('')
     setIsTyping(true)
 
-    // Simulate bot thinking time
+    // Reduced delay for faster responses
     setTimeout(() => {
-      const { response, recommendations, showQuickOptions } = generateBotResponse(messageText)
+      const { response, recommendations, showQuickOptions } = generateBotResponse(messageText, intent)
       
       const botMessage = {
         id: Date.now() + 1,
@@ -210,11 +291,23 @@ export default function ChatBot() {
 
       setMessages(prev => [...prev, botMessage])
       setIsTyping(false)
-    }, 1000)
+    }, 500) // Reduced from 1000ms to 500ms
   }
 
   const handleQuickOption = (optionQuery) => {
-    handleSendMessage(optionQuery)
+    // Map option queries to intents for better accuracy
+    const intentMap = {
+      "action movies": "action",
+      "comedy movies": "comedy", 
+      "romance movies": "romance",
+      "horror movies": "horror",
+      "top rated movies": "top_rated",
+      "popular movies": "popular",
+      "random movies": "random"
+    }
+    
+    const intent = intentMap[optionQuery] || null
+    handleSendMessage(optionQuery, intent)
   }
 
   const handleKeyPress = (e) => {

@@ -185,7 +185,7 @@ Build and deploy
 
 npm run build
 npm run deploy
-Your app will be live at:
+the app will be live at:
 https://ayaemx.github.io/ayooya-movie-app/
 
 text

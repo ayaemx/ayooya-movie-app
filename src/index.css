@@ -7,22 +7,23 @@
 }
 
 :root {
-  --primary-color: #6B46C1;
-  --secondary-color: #F59E0B;
-  --accent-color: #10B981;
-  --bg-primary: #0F0F23;
-  --bg-secondary: #1A1A2E;
-  --bg-card: #16213E;
+  --primary-color: #E50914; /* Netflix red */
+  --secondary-color: #B81D24;
+  --accent-color: #F40612;
+  --bg-primary: #141414;
+  --bg-secondary: #1F1F1F;
+  --bg-card: #221F1F;
   --text-primary: #FFFFFF;
-  --text-secondary: #B8BCC8;
-  --text-muted: #6B7280;
-  --gradient-primary: linear-gradient(135deg, #6B46C1 0%, #9333EA 100%);
-  --gradient-secondary: linear-gradient(135deg, #F59E0B 0%, #EAB308 100%);
-  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.4);
+  --text-secondary: #B3B3B3;
+  --text-muted: #666666;
+  --gradient-primary: linear-gradient(135deg, #E50914 0%, #B81D24 100%);
+  --gradient-secondary: linear-gradient(135deg, #F40612 0%, #B81D24 100%);
+  --shadow-lg: 0 20px 40px rgba(229, 9, 20, 0.3);
+  --shadow-xl: 0 25px 50px rgba(229, 9, 20, 0.4);
   --border-radius: 12px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 
 body {
   font-family: 'Inter', sans-serif;

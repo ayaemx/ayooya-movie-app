@@ -4,7 +4,7 @@ import { addFavorite, removeFavorite } from '../features/favorites/favoritesSlic
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder'
 
-export default function MovieCard({ movie  , onDetails}) {
+export default function MovieCard({ movie, onDetails }) {
   const dispatch = useDispatch()
   const favorites = useSelector(state => state.favorites.items)
   const isFavorite = favorites.some(fav => fav.id === movie.id)
@@ -19,7 +19,7 @@ export default function MovieCard({ movie  , onDetails}) {
     }
   }
 
- return (
+  return (
     <div
       className="movie-card"
       onMouseEnter={() => setHovered(true)}
@@ -31,6 +31,7 @@ export default function MovieCard({ movie  , onDetails}) {
         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
         alt={movie.title}
         className="movie-poster"
+        onClick={() => onDetails(movie)} // ← Added this line!
       />
       <div className="movie-title-overlay">
         <span>{movie.title}</span>
@@ -52,4 +53,3 @@ export default function MovieCard({ movie  , onDetails}) {
     </div>
   )
 }
-

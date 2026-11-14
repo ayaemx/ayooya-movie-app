@@ -135,19 +135,23 @@ const SMALL_TALK =
   /^\s*(hi|hey|hello|yo|hiya|good (morning|evening|afternoon)|how are you|what'?s up|sup|thanks|thank you|thx|ok|okay|cool|nice|great|bye|who are you|what can you do|help)\b|^\s*(مرحبا|اهلا|أهلا|أهلًا|هاي|السلام عليكم|سلام|شكرا|شكرًا|كيف حالك|من انت|من أنت|ازيك|إزيك)/i
 const WANTS_MOVIE = /watch|movie|film|recommend|suggest|something|bored|surprise|فيلم|أفلام|افلام|اقترح|رشح|مشاهدة|ملل/i
 
+const LIKE = /(?:like|similar to|مثل|زي|يشبه)\s+["“]?([^"”,.!?]{2,60})/i
+/** The film named in "something like X but ...", or "" when there is none. */
+export function likeTitle(message) {
+  const m = message.match(LIKE)
+  return m ? m[1].replace(/\s+(but|with|only|just|و?لكن|بس)\s.*$/i, "").trim() : ""
+}
+
 export function keywordPlan(message) {
   const words = message.trim().split(/\s+/).length
   // Check greetings first: short Arabic greetings contain letters that also spell genre words.
   if (words <= 4 && SMALL_TALK.test(message) && !WANTS_MOVIE.test(message)) {
     return sanitizePlan({ intent: "chitchat" })
   }
-  const like = message.match(/(?:like|similar to|مثل|زي|يشبه)\s+["“]?([^"”,.!?]{2,60})/i)
+  const like = likeTitle(message)
   const include = KEYWORDS.filter(([, re]) => re.test(message)).map(([g]) => g)
   const base = { include_genres: include, exclude_genres: [], reply: "" }
-  if (like) {
-    const title = like[1].replace(/\s+(but|with|و?لكن|بس)\s.*$/i, "").trim()
-    return sanitizePlan({ ...base, include_genres: [], intent: "similar", title })
-  }
+  if (like) return sanitizePlan({ ...base, include_genres: [], intent: "similar", title: like })
   if (/trending|popular|right now|رائج|الأكثر|ترند/i.test(message)) return sanitizePlan({ ...base, intent: "trending" })
   if (/top|best|highest|أفضل|افضل/i.test(message))
     return sanitizePlan({ ...base, intent: "recommend", sort: "top_rated" })
@@ -223,6 +227,17 @@ export async function assist(env, { message, history, lang }) {
   } catch {
     plan = keywordPlan(message)
     source = "fallback"
+  }
+
+  // Belt and braces: "like <film>" must anchor on that film even if the model
+  // classified the request as a general recommendation.
+  const named = likeTitle(message)
+  if (
+    named &&
+    /\b(something|movies?|films?|anything|one)\s+(like|similar to)\b|مثل|يشبه|زي/i.test(message) &&
+    plan.intent !== "similar"
+  ) {
+    plan = { ...plan, intent: "similar", title: plan.title || named }
   }
 
   const candidates = (await runPlan(env, plan, lang)).slice(0, 12)

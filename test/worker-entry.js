@@ -18,6 +18,9 @@ const fakeAI = {
           },
         }
       }
+      if (user.includes("MISCLASSIFIED")) {
+        return { response: { intent: "recommend", include_genres: [], reply: "Sure:" } }
+      }
       return {
         response: JSON.stringify({
           intent: "similar",

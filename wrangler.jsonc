@@ -16,8 +16,8 @@
     {
       "binding": "DB",
       "database_name": "ayooya",
-      // Replace with the id printed by: npx wrangler d1 create ayooya
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Database ids are identifiers, not secrets — safe to commit
+      "database_id": "be5d8409-944c-4757-b8c1-6deac0f39131",
       "migrations_dir": "./migrations",
     },
   ],

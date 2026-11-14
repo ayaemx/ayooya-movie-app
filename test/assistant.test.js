@@ -26,7 +26,7 @@ describe("sanitizePlan (model output is untrusted)", () => {
 
   it("caps reply length and strips control characters", () => {
     const plan = sanitizePlan({ intent: "chitchat", reply: "a\u0007b".padEnd(900, "x") })
-    expect(plan.reply.length).toBe(300)
+    expect(plan.reply.length).toBe(600)
     expect(plan.reply).not.toContain("\u0007")
   })
 })
@@ -41,6 +41,14 @@ describe("keywordPlan (fallback when the model is unavailable)", () => {
   it("maps moods to genres in English and Arabic", () => {
     expect(keywordPlan("a funny movie").include).toEqual([35])
     expect(keywordPlan("فيلم رعب").include).toEqual([27])
+  })
+  it("treats greetings and thanks as conversation, not as a film title to search", () => {
+    for (const msg of ["hi", "Hello there!", "thanks a lot", "how are you?", "مرحبا", "شكرا"]) {
+      expect(keywordPlan(msg).intent).toBe("chitchat")
+    }
+  })
+  it("gives picks for vague requests instead of a dead end", () => {
+    expect(keywordPlan("I'm bored, surprise me").intent).toBe("trending")
   })
   it("recognises trending requests", () => {
     expect(keywordPlan("what's trending right now?").intent).toBe("trending")

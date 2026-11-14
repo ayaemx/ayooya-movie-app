@@ -33,7 +33,7 @@ function Details({ movie }) {
           </>
         )}
       </div>
-      <div className="modal-body">
+      <div className={playing && movie.trailer_key ? "modal-body is-playing" : "modal-body"}>
         <h2 id="movie-dialog-title">{movie.title}</h2>
         {movie.tagline && <p className="tagline">{movie.tagline}</p>}
         <p className="modal-meta">

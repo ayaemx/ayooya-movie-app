@@ -41,8 +41,8 @@ export default function Navbar() {
     <header className={scrolled ? "nav is-solid" : "nav"}>
       <nav className="nav-inner" aria-label="Main">
         <Link to="/" className="logo" aria-label="Ayooya">
-          <span className="logo-mark" aria-hidden="true" />
           ayooya
+          <span className="logo-mark" aria-hidden="true" />
         </Link>
         <ul className="nav-links">
           <li>
@@ -106,7 +106,7 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            <Link to="/login" className="btn btn-primary btn-small">
+            <Link to="/login" className="btn btn-secondary btn-small">
               {t("sign_in")}
             </Link>
           )}

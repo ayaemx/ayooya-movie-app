@@ -6,7 +6,7 @@ const fakeAI = {
     const system = messages[0].content
     const user = messages[messages.length - 1].content
     if (user.includes("BROKEN")) throw new Error("model offline")
-    if (system.includes("search plan")) {
+    if (system.includes("Pick the intent")) {
       if (user.includes("MALICIOUS")) {
         // A hijacked model: unknown intent, made-up genre, markup in the reply.
         return {

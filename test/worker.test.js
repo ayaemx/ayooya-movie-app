@@ -316,6 +316,12 @@ describe("AI assistant", () => {
     expect(data.movies.length).toBeGreaterThan(0)
   })
 
+  it("answers small talk conversationally, with no film list, even when the model is down", async () => {
+    const data = await (await chat("hello! BROKEN")).json()
+    expect(data.movies).toEqual([])
+    expect(data.reply).toMatch(/Ayooya/)
+  })
+
   it("validates input size and shape", async () => {
     expect((await chat("")).status).toBe(400)
     expect((await api("/api/chat", { method: "POST", body: { message: "x".repeat(20000) } })).status).toBe(413)

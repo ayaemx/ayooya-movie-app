@@ -41,7 +41,14 @@ export default function ChatBot() {
   const send = async (text) => {
     const message = text.trim()
     if (message.length < 2 || busy) return
-    const history = messages.slice(-6).map((m) => ({ role: m.role, content: m.text }))
+    // Include the titles already shown, so "more like the second one" makes sense to the model.
+    const history = messages
+      .filter((m) => !m.error)
+      .slice(-8)
+      .map((m) => ({
+        role: m.role,
+        content: m.movies?.length ? `${m.text}\n[Films shown: ${m.movies.map((x) => x.title).join("; ")}]` : m.text,
+      }))
     setMessages((prev) => [...prev, { role: "user", text: message }])
     setInput("")
     setBusy(true)
@@ -184,7 +191,8 @@ export default function ChatBot() {
           onClick={() => setOpen(true)}
           aria-label={t("chat_open")}
         >
-          <SparkIcon size={22} />
+          <SparkIcon size={20} />
+          <span>{t("chat_launcher")}</span>
         </button>
       )}
     </>

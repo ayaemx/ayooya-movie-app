@@ -35,7 +35,7 @@ export default function Home() {
         <MovieRow title={t("row_trending")} movies={trending.data} loading={trending.isLoading} />
         <MovieRow title={t("row_my_list")} movies={myList} />
         <MovieRow title={t("row_popular")} movies={popular.data} loading={popular.isLoading} />
-        <MovieRow title={t("row_top_rated")} movies={topRated.data} loading={topRated.isLoading} />
+        <MovieRow title={t("row_top_rated")} movies={topRated.data} loading={topRated.isLoading} variant="poster" />
         <MovieRow title={t("row_upcoming")} movies={upcoming.data} loading={upcoming.isLoading} />
       </div>
     </>

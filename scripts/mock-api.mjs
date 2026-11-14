@@ -5,11 +5,11 @@ import { Miniflare } from "miniflare"
 
 const TITLES = [
   "Paper Lanterns",
-  "The Long Orbit",
+  "Batman: Knightfall Part 1: Knightfall",
   "Midnight Bakery",
-  "Glass Harbor",
+  "Demon Slayer: Kimetsu no Yaiba Infinity Castle",
   "Echo Valley",
-  "Small Giants",
+  "Avatar Aang: The Last Airbender",
   "The Last Signal",
   "Saffron Road",
   "Northern Lights Inn",

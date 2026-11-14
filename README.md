@@ -5,7 +5,7 @@ trailers, a personal watchlist, English/Arabic (RTL) and an AI assistant that
 understands requests like _"something like Interstellar but less sad"_.
 
 - **v1 (2025, ITI team project):** https://ayaemx.github.io/ayooya-movie-app/ — kept online as the "before", tagged [`v1-iti`](../../tree/v1-iti)
-- **v2 (2026, this branch):** a security-first rebuild by [Aya Emad](https://github.com/ayaemx)
+- **v2 (2026, live):** https://ayooya.ayaemx.workers.dev — a security-first rebuild by [Aya Emad](https://github.com/ayaemx)
 
 | Home                                  | AI assistant                                    | Arabic, mobile                                          |
 | ------------------------------------- | ----------------------------------------------- | ------------------------------------------------------- |
@@ -22,7 +22,7 @@ understands requests like _"something like Interstellar but less sad"_.
 | **Watchlist**    | Lost on refresh                                       | Saved per device for guests, synced to the account after sign-in                                                                 |
 | **Chatbot**      | Keyword matching over the 20 movies on screen         | LLM plans a real catalogue search, explains each pick, with guardrails and a fallback                                            |
 | **UI/UX**        | Single grid, mouse-only hover actions, partial Arabic | Billboard + rows, skeleton loading, shareable detail links, full RTL, keyboard and screen-reader support, reduced-motion support |
-| **Quality**      | 0 tests, ESLint failing                               | 32 automated tests, lint with accessibility rules, CI on every push                                                              |
+| **Quality**      | 0 tests, ESLint failing                               | 35 automated tests, lint with accessibility rules, CI on every push                                                              |
 | **Dependencies** | 13 runtime packages, audit warnings                   | 9 runtime packages, `npm audit --omit=dev` clean, Dependabot                                                                     |
 | **Product**      | No measurement                                        | Privacy-friendly analytics, hero A/B test, SEO and share cards                                                                   |
 

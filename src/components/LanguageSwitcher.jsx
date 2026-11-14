@@ -1,19 +1,17 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next"
 
 export default function LanguageSwitcher() {
-  const { i18n } = useTranslation();
-
-  const handleLanguageChange = (e) => {
-    i18n.changeLanguage(e.target.value);
-    // Optional: change direction for RTL languages
-    document.body.dir = e.target.value === "ar" ? "rtl" : "ltr";
-  };
-
+  const { i18n, t } = useTranslation()
+  const next = i18n.language === "ar" ? "en" : "ar"
   return (
-    <select value={i18n.language} onChange={handleLanguageChange} className="nav-lang-dropdown">
-      <option value="en">English</option>
-      <option value="ar">العربية</option>
-    </select>
-  );
+    <button
+      type="button"
+      className="btn btn-ghost lang-switch"
+      onClick={() => i18n.changeLanguage(next)}
+      aria-label={`${t("language")}: ${next === "ar" ? "العربية" : "English"}`}
+      lang={next}
+    >
+      {next === "ar" ? "العربية" : "EN"}
+    </button>
+  )
 }

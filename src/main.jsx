@@ -1,18 +1,22 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { HashRouter } from 'react-router-dom' // Changed from BrowserRouter
-import { Provider } from 'react-redux'
-import { store } from './app/store.js'
-import App from './App.jsx'
-import './index.css'
-import './i18n'
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
+import { BrowserRouter } from "react-router-dom"
+import { Provider } from "react-redux"
+import "@fontsource-variable/outfit"
+import "@fontsource/tajawal/400.css"
+import "@fontsource/tajawal/500.css"
+import "@fontsource/tajawal/700.css"
+import { store } from "./app/store.js"
+import App from "./App.jsx"
+import "./i18n.js"
+import "./index.css"
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <HashRouter>
+      <BrowserRouter>
         <App />
-      </HashRouter>
+      </BrowserRouter>
     </Provider>
   </StrictMode>,
 )

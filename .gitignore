@@ -25,3 +25,11 @@ dist-ssr
 
 .yalc/
 yalc.lock
+
+# Secrets and local state — never commit these
+.env
+.env.*
+!.env.example
+.dev.vars
+.wrangler/
+coverage/

@@ -1,0 +1,4 @@
+# Copy to .dev.vars (git-ignored) for local development.
+TMDB_API_KEY=your_tmdb_v3_key_here
+ADMIN_TOKEN=change-me-to-a-long-random-string
+ALLOWED_ORIGINS=http://localhost:5173

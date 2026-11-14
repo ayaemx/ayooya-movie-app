@@ -1,39 +1,28 @@
-import React from 'react'
+import { Component } from "react"
+import i18n from "../i18n.js"
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { hasError: false }
+export default class ErrorBoundary extends Component {
+  state = { failed: false }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true }
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo)
+  componentDidCatch(error) {
+    // Log for developers; users never see stack traces.
+    console.error(error)
   }
 
   render() {
-    if (this.state.hasError) {
-      return (
-        <div className="error-fallback">
-          <div className="container">
-            <h2>🎬 Oops! Something went wrong</h2>
-            <p>We're having trouble loading this page. Please try refreshing.</p>
-            <button 
-              className="hero-btn primary"
-              onClick={() => window.location.reload()}
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      )
-    }
-
-    return this.props.children
+    if (!this.state.failed) return this.props.children
+    return (
+      <div className="state" role="alert">
+        <h1>{i18n.t("error_title")}</h1>
+        <p>{i18n.t("error_body")}</p>
+        <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
+          {i18n.t("retry")}
+        </button>
+      </div>
+    )
   }
 }
-
-export default ErrorBoundary

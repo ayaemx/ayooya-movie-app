@@ -1,28 +1,39 @@
-import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
-import MovieCard from '../components/MovieCard'
-import MovieModal from '../components/MovieModel'
+import { Link } from "react-router-dom"
+import { useSelector } from "react-redux"
+import { useTranslation } from "react-i18next"
+import MovieCard from "../components/MovieCard.jsx"
 
 export default function Favorites() {
-  const favorites = useSelector(state => state.favorites.items)
-  const [selectedMovie, setSelectedMovie] = useState(null)
-
-  if (favorites.length === 0) {
-    return <div style={{ color: '#fff', textAlign: 'center', marginTop: '3rem' }}>No favorites yet.</div>
-  }
+  const { t } = useTranslation()
+  const items = useSelector((s) => s.favorites.items)
+  const user = useSelector((s) => s.auth.user)
 
   return (
-    <div className="movie-grid-container">
-      <div className="movie-grid">
-        {favorites.map(movie => (
-          <MovieCard
-            key={movie.id}
-            movie={movie}
-            onDetails={setSelectedMovie} // Pass this prop for the Details button
-          />
-        ))}
-      </div>
-      <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+    <div className="page">
+      <title>{`${t("my_list")} — Ayooya`}</title>
+      <h1>{t("my_list")}</h1>
+      {!user && items.length > 0 && (
+        <p className="note">
+          {t("list_guest_note")} <Link to="/login">{t("sign_in")}</Link>
+        </p>
+      )}
+      {items.length === 0 ? (
+        <div className="state">
+          <h2>{t("list_empty_title")}</h2>
+          <p>{t("list_empty_body")}</p>
+          <Link to="/" className="btn btn-primary">
+            {t("browse_movies")}
+          </Link>
+        </div>
+      ) : (
+        <ul className="grid">
+          {items.map((m) => (
+            <li key={m.id}>
+              <MovieCard movie={m} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

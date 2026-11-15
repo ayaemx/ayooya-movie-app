@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar.jsx"
 import MovieModal from "./components/MovieModel.jsx"
 import ChatBot from "./components/ChatBot.jsx"
 import ErrorBoundary from "./components/ErrorBoundary.jsx"
+import Intro from "./components/Intro.jsx"
 import Home from "./pages/Home.jsx"
 import Search from "./pages/Search.jsx"
 import Favorites from "./pages/Favorites.jsx"
@@ -38,6 +39,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <Intro />
       <a className="skip-link" href="#main">
         {t("skip_to_content")}
       </a>

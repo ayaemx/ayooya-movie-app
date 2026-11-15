@@ -79,5 +79,12 @@
   "footer_credit": "Movie data and images from TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.",
   "footer_privacy": "No tracking cookies. Only anonymous, aggregate usage counts.",
   "chat_launcher": "Ask Ayooya",
-  "hero_next": "Featured films"
+  "hero_next": "Featured films",
+  "badge_coming_soon": "Coming soon",
+  "badge_new": "New release",
+  "badge_top_rated": "Top rated",
+  "row_top10": "Top 10 this week",
+  "rank": "Number {{n}}",
+  "sound_on": "Turn trailer sound on",
+  "sound_off": "Mute trailer"
 }

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { backdropUrl, posterSrcSet, posterUrl, yearOf } from "../lib/images.js"
+import { badgeFor } from "../lib/badges.js"
 import { useMovieParam } from "../hooks/useMovieParam.js"
 import FavoriteButton from "./FavoriteButton.jsx"
 import { StarIcon } from "./Icons.jsx"
@@ -8,10 +9,11 @@ import { StarIcon } from "./Icons.jsx"
  * variant "wide": a 16:9 still with the title set over it (the default).
  * variant "poster": the tall theatrical poster with the title underneath.
  */
-export default function MovieCard({ movie, reason, variant = "wide" }) {
+export default function MovieCard({ movie, reason, variant = "wide", rank }) {
   const { t } = useTranslation()
   const { open } = useMovieParam()
   const wide = variant === "wide"
+  const badge = badgeFor(movie)
   const still = wide ? backdropUrl(movie.backdrop_path, "w780") : null
 
   const meta = (
@@ -59,12 +61,20 @@ export default function MovieCard({ movie, reason, variant = "wide" }) {
           </>
         )}
       </button>
+      {badge && <span className={`label label-${badge.replace("badge_", "")}`}>{t(badge)}</span>}
       {!wide && (
-        <div className="card-below">
-          <h3 className="card-title" title={movie.title}>
-            {movie.title}
-          </h3>
-          {meta}
+        <div className={rank ? "card-below is-ranked" : "card-below"}>
+          {rank && (
+            <span className="rank" aria-label={t("rank", { n: rank })}>
+              {rank}
+            </span>
+          )}
+          <div>
+            <h3 className="card-title" title={movie.title}>
+              {movie.title}
+            </h3>
+            {meta}
+          </div>
         </div>
       )}
       {reason && <p className="card-reason">{reason}</p>}

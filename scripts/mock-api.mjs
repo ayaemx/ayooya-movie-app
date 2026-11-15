@@ -30,7 +30,7 @@ const movie = (i) => ({
   poster_path: `/poster${i % 8}.jpg`,
   backdrop_path: `/backdrop${i % 5}.jpg`,
   vote_average: 6.2 + (i % 7) * 0.4,
-  release_date: `20${10 + (i % 15)}-0${1 + (i % 9)}-15`,
+  release_date: i % 5 === 1 ? "2026-11-01" : i % 7 === 3 ? "2027-02-10" : `20${10 + (i % 15)}-0${1 + (i % 9)}-15`,
   genre_ids: [GENRES[i % GENRES.length], GENRES[(i + 3) % GENRES.length]],
 })
 const list = (offset) => ({ results: Array.from({ length: 16 }, (_, i) => movie(i + offset)) })

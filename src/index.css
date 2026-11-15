@@ -445,6 +445,23 @@ main:focus {
     fade-in 0.9s var(--ease),
     hero-drift 14s linear forwards;
 }
+/* Background trailer: scaled up so the player's own chrome sits outside the frame. */
+.hero-video {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  transform: scale(1.45);
+  pointer-events: none;
+  animation: fade-in 1.4s 1.6s both;
+}
+.hero-sound {
+  position: absolute;
+  inset-block-start: calc(var(--nav-h) + 1rem);
+  inset-inline-end: var(--gutter);
+}
 .hero-shade {
   position: absolute;
   inset: 0;
@@ -556,7 +573,7 @@ main:focus {
   transform-origin: right;
 }
 .frame.is-active .frame-progress {
-  animation: progress 9s linear forwards;
+  animation: progress var(--rotate, 9s) linear forwards;
 }
 .hero.is-paused .frame-progress {
   animation-play-state: paused;
@@ -782,6 +799,45 @@ main:focus {
   .card-fav {
     opacity: 1;
   }
+}
+
+/* Labels and ranks */
+.label {
+  position: absolute;
+  inset-block-start: 0.7rem;
+  inset-inline-start: 0.7rem;
+  z-index: 1;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 0.7);
+  backdrop-filter: blur(8px);
+  color: var(--ivory);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.4;
+  pointer-events: none;
+}
+.label-new {
+  background: var(--ivory);
+  color: #000;
+}
+.label-top_rated {
+  background: var(--gold);
+  color: #000;
+}
+.card-below.is-ranked {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+}
+.rank {
+  min-width: 1.1ch;
+  color: var(--gold);
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(2.6rem, 4vw, 3.6rem);
+  line-height: 0.9;
+  font-variant-numeric: lining-nums;
+  text-align: center;
 }
 
 /* ---------- Skeleton loading ---------- */

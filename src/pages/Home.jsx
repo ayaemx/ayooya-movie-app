@@ -32,11 +32,17 @@ export default function Home() {
       <title>{`Ayooya — ${t("brand_tagline")}`}</title>
       {trending.isLoading ? <HeroSkeleton /> : <Hero movies={featured} />}
       <div className="rows">
-        <MovieRow title={t("row_trending")} movies={trending.data} loading={trending.isLoading} />
+        <MovieRow
+          title={t("row_top10")}
+          movies={(trending.data ?? []).slice(0, 10)}
+          loading={trending.isLoading}
+          variant="poster"
+          ranked
+        />
         <MovieRow title={t("row_my_list")} movies={myList} />
         <MovieRow title={t("row_popular")} movies={popular.data} loading={popular.isLoading} />
-        <MovieRow title={t("row_top_rated")} movies={topRated.data} loading={topRated.isLoading} variant="poster" />
-        <MovieRow title={t("row_upcoming")} movies={upcoming.data} loading={upcoming.isLoading} />
+        <MovieRow title={t("row_top_rated")} movies={topRated.data} loading={topRated.isLoading} />
+        <MovieRow title={t("row_upcoming")} movies={upcoming.data} loading={upcoming.isLoading} variant="poster" />
       </div>
     </>
   )

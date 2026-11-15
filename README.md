@@ -22,7 +22,7 @@ understands requests like _"something like Interstellar but less sad"_.
 | **Watchlist**    | Lost on refresh                                       | Saved per device for guests, synced to the account after sign-in                                                                 |
 | **Chatbot**      | Keyword matching over the 20 movies on screen         | LLM plans a real catalogue search, explains each pick, with guardrails and a fallback                                            |
 | **UI/UX**        | Single grid, mouse-only hover actions, partial Arabic | Billboard + rows, skeleton loading, shareable detail links, full RTL, keyboard and screen-reader support, reduced-motion support |
-| **Quality**      | 0 tests, ESLint failing                               | 35 automated tests, lint with accessibility rules, CI on every push                                                              |
+| **Quality**      | 0 tests, ESLint failing                               | 40 automated tests, lint with accessibility rules, CI on every push                                                              |
 | **Dependencies** | 13 runtime packages, audit warnings                   | 9 runtime packages, `npm audit --omit=dev` clean, Dependabot                                                                     |
 | **Product**      | No measurement                                        | Privacy-friendly analytics, hero A/B test, SEO and share cards                                                                   |
 

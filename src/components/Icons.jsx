@@ -81,3 +81,15 @@ export const EyeOffIcon = (p) => (
     <path d="M3 3l18 18M10.6 5.1A9.8 9.8 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.2 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 4.3-1" />
   </Svg>
 )
+export const VolumeIcon = (p) => (
+  <Svg {...p}>
+    <path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4Z" />
+    <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+  </Svg>
+)
+export const MuteIcon = (p) => (
+  <Svg {...p}>
+    <path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4Z" />
+    <path d="m16 9.5 5 5M21 9.5l-5 5" />
+  </Svg>
+)

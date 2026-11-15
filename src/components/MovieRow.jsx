@@ -4,7 +4,7 @@ import MovieCard from "./MovieCard.jsx"
 import { RowSkeleton } from "./Skeletons.jsx"
 import { ChevronIcon } from "./Icons.jsx"
 
-export default function MovieRow({ title, movies = [], loading = false, variant = "wide" }) {
+export default function MovieRow({ title, movies = [], loading = false, variant = "wide", ranked = false }) {
   const { t, i18n } = useTranslation()
   const track = useRef(null)
   const headingId = useId()
@@ -45,9 +45,9 @@ export default function MovieRow({ title, movies = [], loading = false, variant 
         <RowSkeleton variant={variant} />
       ) : (
         <ul className={`row-track row-${variant}`} ref={track}>
-          {movies.map((m) => (
+          {movies.map((m, i) => (
             <li key={m.id}>
-              <MovieCard movie={m} variant={variant} />
+              <MovieCard movie={m} variant={variant} rank={ranked ? i + 1 : undefined} />
             </li>
           ))}
         </ul>

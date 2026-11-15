@@ -18,8 +18,13 @@ describe("sanitizePlan (model output is untrusted)", () => {
     expect(plan.sort).toBe("popular")
   })
 
+  it("accepts loosely formatted genre names from the model", () => {
+    expect(sanitizePlan({ include_genres: "comedy, Family" }).include).toEqual([35, 10751])
+    expect(sanitizePlan({ include_genres: ["Sci-Fi", "KIDS", "nonsense"] }).include).toEqual([878, 10751])
+  })
+
   it("survives garbage", () => {
-    for (const junk of [null, "text", 42, [], { include_genres: "Comedy" }]) {
+    for (const junk of [null, "text", 42, [], { include_genres: 7 }]) {
       expect(sanitizePlan(junk).intent).toBe("recommend")
     }
   })

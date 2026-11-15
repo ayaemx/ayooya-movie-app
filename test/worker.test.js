@@ -303,7 +303,16 @@ describe("AI assistant", () => {
 
   it("anchors on the named film even if the model misclassifies the request", async () => {
     await chat("MISCLASSIFIED something like Interstellar but less sad")
-    expect(tmdbCalls.at(-1).pathname).toMatch(/\/movie\/100\/recommendations$/)
+    const paths = tmdbCalls.slice(-3).map((u) => u.pathname)
+    expect(paths.some((p) => p.endsWith("/movie/100/recommendations"))).toBe(true)
+    expect(paths.some((p) => p.endsWith("/movie/100/similar"))).toBe(true)
+  })
+
+  it("uses the obvious words in the message when the model names no genres", async () => {
+    const data = await (await chat("MISCLASSIFIED a funny film for family night")).json()
+    expect(data.understood.genres).toEqual(["Comedy", "Family"])
+    const discover = tmdbCalls.filter((u) => u.pathname.endsWith("/discover/movie")).at(-1)
+    expect(discover.searchParams.get("with_genres")).toBe("35,10751")
   })
 
   it("neutralises a hijacked model response", async () => {

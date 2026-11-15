@@ -79,6 +79,7 @@ export const lists = {
   topRated: (env, lang, page) => tmdb(env, "/movie/top_rated", { page }, lang).then(slimList),
   upcoming: (env, lang, page) => tmdb(env, "/movie/upcoming", { page }, lang).then(slimList),
   search: (env, lang, query, page) => tmdb(env, "/search/movie", { query, page }, lang).then(slimList),
+  similar: (env, lang, id) => tmdb(env, `/movie/${id}/similar`, {}, lang).then(slimList),
   recommendations: (env, lang, id) => tmdb(env, `/movie/${id}/recommendations`, {}, lang).then(slimList),
   discover: (env, lang, o = {}) =>
     tmdb(

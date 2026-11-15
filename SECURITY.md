@@ -27,7 +27,7 @@ Anything crossing a boundary is validated on the Worker side.
 | No session handling                                                                              | Random 256-bit token in an `HttpOnly; Secure; SameSite=Lax` cookie with the `__Host-` prefix; only its SHA-256 is stored ✅   |
 | Browser called a third-party API directly with user input                                        | Allow-listed endpoints and validated parameters only; upstream error bodies are never forwarded ✅                            |
 | No security headers                                                                              | Strict CSP (`script-src 'self'`, no inline script or style), HSTS, `nosniff`, frame denial, referrer and permissions policies |
-| No tests, lint broken, known-vulnerable packages                                                 | 40 tests, lint + a11y rules, `npm audit` and a secret scan on every push, Dependabot                                          |
+| No tests, lint broken, known-vulnerable packages                                                 | 42 tests, lint + a11y rules, `npm audit` and a secret scan on every push, Dependabot                                          |
 
 ## Threats and mitigations (STRIDE-style)
 

@@ -1,108 +1,137 @@
-# Ayooya — movie discovery with an AI assistant
+# Ayooya
 
-A streaming-style movie discovery app: trending billboard, scrolling rows,
-trailers, a personal watchlist, English/Arabic (RTL) and an AI assistant that
-understands requests like _"something like Interstellar but less sad"_.
+**A film discovery app with an AI concierge, rebuilt security-first.**
 
-- **v1 (2025, ITI team project):** https://ayaemx.github.io/ayooya-movie-app/ — kept online as the "before", tagged [`v1-iti`](../../tree/v1-iti)
-- **v2 (2026, live):** https://ayooya.ayaemx.workers.dev — a security-first rebuild by [Aya Emad](https://github.com/ayaemx)
+**Live:** https://ayooya.ayaemx.workers.dev
 
-| Home                                  | AI assistant                                    | Arabic, mobile                                          |
-| ------------------------------------- | ----------------------------------------------- | ------------------------------------------------------- |
-| ![Home](docs/screenshots/v2-home.png) | ![Assistant](docs/screenshots/v2-assistant.png) | ![Arabic mobile](docs/screenshots/v2-mobile-arabic.png) |
+Ayooya started in 2025 as a team project at ITI (a React movie browser).
+In 2026 I rebuilt it on my own to show how my skills have grown: a real backend,
+real authentication, an AI assistant with guardrails, a new visual identity, and
+an automated test and delivery pipeline.
 
-<sub>Screenshots use the offline mock catalogue (`npm run dev:mock`), so posters are placeholders.</sub>
+|                                           |                                           |
+| ----------------------------------------- | ----------------------------------------- |
+| ![Home](docs/screenshots/home.jpg)        | ![Top 10 row](docs/screenshots/top10.jpg) |
+| Hero with background trailers             | Ranked Top 10 and data-driven labels      |
+| ![Intro](docs/screenshots/intro.jpg)      |                                           |
+| Three-second intro with a generated sound |                                           |
 
-## Before → after
+## What it does
 
-| Area             | v1                                                    | v2                                                                                                                               |
-| ---------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **API key**      | Committed in `.env`, visible in the browser bundle    | Server-side secret behind a Cloudflare Worker proxy                                                                              |
-| **Login**        | Hard-coded test account in client code                | Real accounts, hashed passwords, HttpOnly session cookies, rate limiting                                                         |
-| **Watchlist**    | Lost on refresh                                       | Saved per device for guests, synced to the account after sign-in                                                                 |
-| **Chatbot**      | Keyword matching over the 20 movies on screen         | LLM plans a real catalogue search, explains each pick, with guardrails and a fallback                                            |
-| **UI/UX**        | Single grid, mouse-only hover actions, partial Arabic | Billboard + rows, skeleton loading, shareable detail links, full RTL, keyboard and screen-reader support, reduced-motion support |
-| **Quality**      | 0 tests, ESLint failing                               | 40 automated tests, lint with accessibility rules, CI on every push                                                              |
-| **Dependencies** | 13 runtime packages, audit warnings                   | 9 runtime packages, `npm audit --omit=dev` clean, Dependabot                                                                     |
-| **Product**      | No measurement                                        | Privacy-friendly analytics, hero A/B test, SEO and share cards                                                                   |
+- **Browse** what's trending, popular, top rated and coming soon, in English or Arabic (full right-to-left layout).
+- **Watch** trailers: the hero plays them silently in the background, with a sound toggle.
+- **Ask Ayooya**, the AI concierge: "something like Interstellar but less sad", "a funny film for family night", or just "hi". It searches the real catalogue and explains each pick.
+- **Save** films to My List. Guests keep their list on the device; signing in syncs it to the account.
+- **Share** a film: every detail view has its own link.
 
-## What each part demonstrates
+## Before and after
 
-**Security** — see [SECURITY.md](SECURITY.md) for the full threat model.
-Backend-for-frontend proxy, PBKDF2 password hashing, `__Host-` session cookies,
-CSRF and rate-limit defences, strict Content-Security-Policy, input allow-lists,
-and LLM guardrails mapped to the OWASP LLM Top 10.
+|                  | v1 (2025, ITI team)                              | v2 (2026, solo rebuild)                                                             |
+| ---------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| **API key**      | Committed to the repo and visible in the browser | Server-side secret behind a Cloudflare Worker                                       |
+| **Login**        | One hard-coded test account in client code       | Real accounts, hashed passwords, HttpOnly session cookies, rate limiting            |
+| **My List**      | Lost on refresh                                  | Saved per device, synced to the account                                             |
+| **Assistant**    | Keyword matching over the 20 films on screen     | An LLM plans a real catalogue search, with validation, guardrails and a fallback    |
+| **Design**       | A single poster grid                             | Own design system: cinematic hero, filmstrip selector, ranked row, intro, RTL, a11y |
+| **Quality**      | No tests, lint failing                           | 42 automated tests, lint with accessibility rules, CI on every push                 |
+| **Dependencies** | 13 runtime packages with audit warnings          | 9 runtime packages, production audit clean, Dependabot                              |
+| **Product**      | No measurement                                   | Cookieless analytics and an A/B test on the hero                                    |
 
-**AI** — `worker/lib/assistant.js`. The model never gets tools or secrets. It
-returns a small JSON plan (intent, genres, years); the Worker validates it and
-runs the TMDB query itself, then asks the model to justify picks from the
-results. Invented movies are impossible by construction.
+v1 is preserved under the [`v1-iti`](../../tree/v1-iti) tag.
 
-**UI/UX** — `src/components`, `src/index.css`. Own design system (no UI
-library), logical CSS properties so the layout mirrors for Arabic, native
-`<dialog>` for accessible modals, self-hosted fonts.
+## How it is built
 
-**Automation** — `.github/workflows/ci.yml`. Lint, tests, build, dependency
-audit, secret scan and a Worker dry-run on every push; optional auto-deploy.
+```
+Browser (React SPA)
+   │  same-origin HTTPS, HttpOnly session cookie
+   ▼
+Cloudflare Worker ──► TMDB API       key stored as a Worker secret
+   │              ──► Workers AI     LLM with no secrets and no tools
+   └─────────────►  D1 (SQLite)     users, sessions, lists, counters
+```
 
-**Business** — `worker/routes/events.js`. Cookieless event counts and a 50/50
-hero experiment ("Watch trailer" vs "Find my next movie") with click-through
-per variant at `GET /api/stats`.
+**Frontend:** React 19, Redux Toolkit and RTK Query, React Router, i18next, Vite. No UI library; the design system is hand-written CSS using logical properties so the layout mirrors for Arabic.
 
-## Tech stack
+**Backend:** one Cloudflare Worker that serves the app and the API from the same origin, a D1 database, and Workers AI.
 
-React 19 · Redux Toolkit + RTK Query · React Router · i18next · Vite ·
-Cloudflare Workers (API + static hosting) · D1 (SQLite) · Workers AI · Vitest ·
-Testing Library · Miniflare · GitHub Actions
+**Tooling:** Vitest, Testing Library, Miniflare (runs the real Worker in tests), ESLint with jsx-a11y, Prettier, GitHub Actions, Dependabot.
+
+## Security
+
+The full threat model is in [SECURITY.md](SECURITY.md). The short version:
+
+- **Secrets stay on the server.** The browser only ever calls `/api/*`; CI fails if a key pattern appears in the client bundle.
+- **Authentication:** PBKDF2-SHA256 with per-user salts, random session tokens stored only as hashes, `__Host-` cookies that are `HttpOnly`, `Secure` and `SameSite=Lax`.
+- **Abuse resistance:** rate limits per IP and per targeted account, identical errors for wrong password and unknown email, CSRF checks on every state change.
+- **Strict Content-Security-Policy:** no inline scripts or styles, self-hosted fonts, frames only from the trailer host.
+- **Input allow-lists:** the Worker exposes a fixed set of catalogue endpoints and validates every parameter.
+
+### How the assistant is kept safe
+
+The model never receives a secret and has no tools. It returns a small JSON plan
+(intent, genres, years); the Worker validates that plan against allow-lists and
+runs the catalogue query itself. A second call asks the model to explain picks
+from the films that were actually found, and any film id that was not in that
+list is dropped, so it cannot invent titles. If the model is unavailable, a
+keyword planner answers instead. These behaviours are covered by tests that feed
+the Worker a deliberately hijacked model response.
+
+## Product thinking
+
+- **Analytics without tracking:** an allow-list of event names counted per day. No cookies, user ids or IP addresses are stored, and Do Not Track is honoured.
+- **A/B test:** half of visitors see "Watch trailer" as the main hero button, half see "Find my next movie". Click-through per variant is available to the owner at `GET /api/stats`.
+- **Labels from real data:** "New release", "Coming soon" and "Top rated" are computed from release dates and scores, never assigned by hand.
+- **Accessibility:** keyboard navigation, visible focus, screen-reader labels, reduced-motion support, and a native `<dialog>` for film details.
 
 ## Run it locally
 
 ```bash
 npm install
 
-# Option A — no accounts or keys needed (canned movies, scripted AI)
+# Option A: no accounts or keys (canned films, scripted assistant)
 npm run dev:mock        # terminal 1: mock API on :8787
 npm run dev             # terminal 2: app on http://localhost:5173
 
-# Option B — real data
+# Option B: real data
 cp .dev.vars.example .dev.vars      # add your TMDB key
 npm run db:migrate:local
-npm run dev:api         # terminal 1 (needs `npx wrangler login` for the AI model)
+npm run dev:api         # terminal 1 (needs `npx wrangler login`)
 npm run dev             # terminal 2
 ```
 
-`npm run check` runs lint, tests and the production build.
+`npm run check` runs lint, all tests and the production build.
 
-## Deploy (free Cloudflare plan)
+## Deploy
 
 ```bash
 npx wrangler login
-npx wrangler d1 create ayooya            # paste the printed database_id into wrangler.jsonc
+npx wrangler d1 create ayooya            # put the printed id in wrangler.jsonc
 npm run db:migrate
-npx wrangler secret put TMDB_API_KEY     # a NEW key — see the note below
-npx wrangler secret put ADMIN_TOKEN      # any long random string
 npm run deploy
+npx wrangler secret put TMDB_API_KEY
+npx wrangler secret put ADMIN_TOKEN      # any long random string
 ```
-
-> **Rotate the TMDB key first.** The v1 key was committed to this public repo, so
-> it must be treated as leaked. Create a new key in TMDB settings and use only
-> the new one here.
-
-To see the A/B results:
-`curl -H "Authorization: Bearer <ADMIN_TOKEN>" https://<your-app>/api/stats`
 
 ## Project layout
 
 ```
-worker/        API: routes (auth, favorites, movies, chat, events) + lib (crypto, sessions, rate limit, TMDB, assistant)
+worker/        API routes (auth, favorites, movies, chat, events) and libraries
 migrations/    D1 schema
-src/           React app (api, app, features, components, pages, locales)
-test/          API integration tests (Miniflare), assistant unit tests, UI tests
+src/           React app: api, app, features, components, pages, locales
+test/          API integration tests, assistant unit tests, UI tests
 scripts/       Offline mock API
 ```
 
+## Known limitations
+
+- No email verification, password reset or multi-factor authentication yet.
+- The assistant's film knowledge comes from an open model; it can be wrong about trivia, and it says so when unsure.
+- Background trailers are desktop only.
+
 ## Credits
 
-v1 was built with the ITI team. Movie data and images come from
+v1 was built with my ITI teammates. Film data and images come from
 [TMDB](https://www.themoviedb.org/); this product uses the TMDB API but is not
 endorsed or certified by TMDB.
+
+Built by [Aya Emad](https://github.com/ayaemx).

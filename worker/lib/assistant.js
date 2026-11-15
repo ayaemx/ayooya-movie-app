@@ -75,6 +75,7 @@ const picksPrompt = (lang) => `${persona(lang)}
 The user asked for something to watch and the app found the candidate films below. Return JSON with "intro" and "picks".
 - "picks": choose up to 5 candidates that best fit what the user asked for, best first. Use only ids from the list; never invent a film.
 - Each "reason" is ONE complete sentence of 12 to 22 words that tells the user why this film suits THEIR request: its tone, what makes it worth watching, who it is good for. Do not just restate the plot, and do not spoil endings. Two-word reasons are not acceptable.
+- Be truthful: only describe a film with qualities its overview supports. If a candidate does not fit the request (for example, it is not funny when they asked for funny), leave it out. Three honest picks beat five forced ones.
 - "intro": 1 or 2 sentences, in your own friendly voice, reacting to the request before the list.
 
 Example of a good reason: "A warm, funny survival story where a stranded astronaut jokes his way through disaster, so it stays hopeful rather than heavy."`
@@ -92,8 +93,40 @@ async function askModel(env, system, messages, schema, maxTokens) {
   return JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1))
 }
 
-const genreIds = (names) =>
-  [...new Set((Array.isArray(names) ? names : []).filter((n) => n in GENRES).map((n) => GENRES[n]))].slice(0, 3)
+// Models do not always echo the enum exactly ("sci-fi", "Kids", "comedy, family"),
+// so genre names are matched leniently and anything unknown is dropped.
+const GENRE_ALIASES = {
+  "sci-fi": "Science Fiction",
+  scifi: "Science Fiction",
+  "science-fiction": "Science Fiction",
+  sf: "Science Fiction",
+  kids: "Family",
+  children: "Family",
+  funny: "Comedy",
+  comedies: "Comedy",
+  romantic: "Romance",
+  "rom-com": "Romance",
+  scary: "Horror",
+  animated: "Animation",
+  anime: "Animation",
+  cartoon: "Animation",
+  suspense: "Thriller",
+  docs: "Documentary",
+  historical: "History",
+  musical: "Music",
+  detective: "Mystery",
+}
+const GENRE_BY_LOWER = Object.fromEntries(GENRE_NAMES.map((n) => [n.toLowerCase(), n]))
+
+function genreIds(names) {
+  const list = Array.isArray(names) ? names : typeof names === "string" ? names.split(/[,/|;]| and /) : []
+  const ids = list
+    .map((n) => String(n).trim().toLowerCase())
+    .map((n) => GENRE_BY_LOWER[n] ?? GENRE_ALIASES[n])
+    .filter(Boolean)
+    .map((n) => GENRES[n])
+  return [...new Set(ids)].slice(0, 3)
+}
 
 const year = (y) => (Number.isInteger(y) && y >= 1900 && y <= 2100 ? y : undefined)
 
@@ -130,6 +163,8 @@ const KEYWORDS = [
   ["Mystery", /myster|detective|غموض/i],
   ["War", /\bwar\b|حرب/i],
 ]
+
+const keywordGenres = (message) => KEYWORDS.filter(([, re]) => re.test(message)).map(([g]) => GENRES[g])
 
 const SMALL_TALK =
   /^\s*(hi|hey|hello|yo|hiya|good (morning|evening|afternoon)|how are you|what'?s up|sup|thanks|thank you|thx|ok|okay|cool|nice|great|bye|who are you|what can you do|help)\b|^\s*(مرحبا|اهلا|أهلا|أهلًا|هاي|السلام عليكم|سلام|شكرا|شكرًا|كيف حالك|من انت|من أنت|ازيك|إزيك)/i
@@ -175,15 +210,24 @@ async function runPlan(env, plan, lang) {
   if (plan.intent === "similar" && plan.title) {
     const [seed] = await lists.search(env, lang, plan.title, 1)
     if (seed) {
-      // Rank rather than discard: films matching the adjustment come first
-      // ("less sad" puts non-dramas ahead), the rest stay as back-up so the
-      // list is always made of films related to the one the user named.
-      const recs = await lists.recommendations(env, lang, seed.id)
+      // Two sources: "similar" (same genres and themes) and "recommendations"
+      // (what viewers of this film also watched). Rank rather than discard:
+      // films closest in genre come first, and an adjustment such as "less sad"
+      // pushes the excluded genre down instead of emptying the list.
+      const [similar, recs] = await Promise.all([
+        lists.similar(env, lang, seed.id).catch(() => []),
+        lists.recommendations(env, lang, seed.id).catch(() => []),
+      ])
+      const inBoth = new Set(similar.map((m) => m.id).filter((id) => recs.some((r) => r.id === id)))
+      const wanted = seed.genre_ids.filter((g) => !plan.exclude.includes(g))
       const score = (m) =>
-        (m.genre_ids.some((g) => plan.exclude.includes(g)) ? -2 : 0) +
-        (plan.include.some((g) => m.genre_ids.includes(g)) ? 1 : 0)
-      const ranked = recs.map((m, i) => ({ m, i })).sort((x, y) => score(y.m) - score(x.m) || x.i - y.i)
-      if (ranked.length) return ranked.map((x) => x.m)
+        m.genre_ids.filter((g) => wanted.includes(g)).length +
+        (inBoth.has(m.id) ? 1 : 0) +
+        (plan.include.some((g) => m.genre_ids.includes(g)) ? 1 : 0) -
+        (m.genre_ids.some((g) => plan.exclude.includes(g)) ? 2 : 0) +
+        (m.vote_average ?? 0) / 20
+      const pool = [...new Map([...recs, ...similar].filter((m) => m.id !== seed.id).map((m) => [m.id, m])).values()]
+      if (pool.length) return pool.sort((x, y) => score(y) - score(x))
     }
   }
   return lists.discover(env, lang, {
@@ -235,9 +279,26 @@ export async function assist(env, { message, history, lang }) {
     plan = { ...plan, intent: "similar", title: plan.title || named }
   }
 
+  // If the model named no genres, fall back on the obvious words in the message
+  // ("funny", "family", "scary") so a clear request never becomes a generic list.
+  if ((plan.intent === "recommend" || plan.intent === "trending") && !plan.include.length) {
+    const fromWords = keywordGenres(message)
+      .filter((g) => !plan.exclude.includes(g))
+      .slice(0, 2)
+    if (fromWords.length) plan = { ...plan, intent: "recommend", include: fromWords }
+  }
+  // Shown to the client so the UI (and a curious reviewer) can see how the request was understood.
+  const nameOf = (id) => GENRE_NAMES.find((n) => GENRES[n] === id)
+  const understood = {
+    intent: plan.intent,
+    title: plan.title || undefined,
+    genres: plan.include.map(nameOf),
+    avoiding: plan.exclude.map(nameOf),
+  }
+
   const candidates = (await runPlan(env, plan, lang)).slice(0, 12)
-  if (plan.intent === "chitchat") return { reply: plan.reply || t.chitchat, movies: [], source }
-  if (!candidates.length) return { reply: t.none, movies: [], source }
+  if (plan.intent === "chitchat") return { reply: plan.reply || t.chitchat, movies: [], source, understood }
+  if (!candidates.length) return { reply: t.none, movies: [], source, understood }
 
   let reply = plan.reply || t.found
   let movies = candidates.slice(0, 5)
@@ -271,5 +332,5 @@ export async function assist(env, { message, history, lang }) {
       /* keep the unranked candidates */
     }
   }
-  return { reply, movies, source }
+  return { reply, movies, source, understood }
 }

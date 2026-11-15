@@ -118,7 +118,7 @@ export default function Hero({ movies }) {
           ref={player}
           key={trailerKey}
           className="hero-video"
-          src={`${PLAYER}/embed/${trailerKey}?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=${trailerKey}&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+          src={`${PLAYER}/embed/${trailerKey}?autoplay=1&mute=1&start=6&controls=0&playsinline=1&loop=1&playlist=${trailerKey}&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
           title={`${movie.title} trailer`}
           allow="autoplay; encrypted-media"
           referrerPolicy="strict-origin-when-cross-origin"

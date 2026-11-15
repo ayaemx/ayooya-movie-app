@@ -175,20 +175,15 @@ async function runPlan(env, plan, lang) {
   if (plan.intent === "similar" && plan.title) {
     const [seed] = await lists.search(env, lang, plan.title, 1)
     if (seed) {
-      const recs = (await lists.recommendations(env, lang, seed.id)).filter(
-        (m) => !m.genre_ids.some((g) => plan.exclude.includes(g)),
-      )
-      const boosted = [
-        ...recs.filter((m) => plan.include.some((g) => m.genre_ids.includes(g))),
-        ...recs.filter((m) => !plan.include.some((g) => m.genre_ids.includes(g))),
-      ]
-      if (boosted.length >= 3) return boosted
-      // Too few survivors: fall back to the seed's own genres minus the excluded ones.
-      const seedGenres = seed.genre_ids.filter((g) => !plan.exclude.includes(g)).slice(0, 2)
-      return lists.discover(env, lang, {
-        withGenres: [...plan.include, ...seedGenres].slice(0, 2),
-        withoutGenres: plan.exclude,
-      })
+      // Rank rather than discard: films matching the adjustment come first
+      // ("less sad" puts non-dramas ahead), the rest stay as back-up so the
+      // list is always made of films related to the one the user named.
+      const recs = await lists.recommendations(env, lang, seed.id)
+      const score = (m) =>
+        (m.genre_ids.some((g) => plan.exclude.includes(g)) ? -2 : 0) +
+        (plan.include.some((g) => m.genre_ids.includes(g)) ? 1 : 0)
+      const ranked = recs.map((m, i) => ({ m, i })).sort((x, y) => score(y.m) - score(x.m) || x.i - y.i)
+      if (ranked.length) return ranked.map((x) => x.m)
     }
   }
   return lists.discover(env, lang, {
